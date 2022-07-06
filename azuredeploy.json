@@ -128,7 +128,8 @@
      "diskname": "[concat(parameters('vmName'), '_DataDisk_0')]",
      "addressPrefixes": "[split(parameters('addressPrefixes'), ',')]",
      "Reader": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
-     "bootstrapRoleAssignmentId": "[guid(concat(subscription().subscriptionId, 'Reader', parameters('vmName')))]"
+     "bootstrapRoleAssignmentId": "[guid(concat(subscription().subscriptionId, 'Reader', parameters('vmName')))]",
+     "subnetId": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetName'))]"
   },
   "resources": [
     {
@@ -176,7 +177,7 @@
                         "properties": {
                           "privateIPAllocationMethod": "Dynamic",
                           "subnet": {
-                            "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetName'))]"
+                            "id": "[variables('subnetId')]"
                           }
                         }
                       }
@@ -296,7 +297,7 @@
           "apiVersion": "2018-09-01-preview",
           "name": "[variables('bootstrapRoleAssignmentId')]",
           "dependsOn": [
-              "[concat('Microsoft.Compute/virtualMachines/',variables('vName'))]"
+              "[concat('nested', parameters('vmName'))]"
           ],
           "properties": {
               "roleDefinitionId": "[variables('Reader')]",
