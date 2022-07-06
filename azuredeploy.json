@@ -135,7 +135,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "name": "[concat('nested', parameters('vmName'))]",
+      "name": "[concat('nested-', parameters('vmName'))]",
       "resourceGroup": "[parameters('resourceGroupInfo').name]",
       "subscriptionId": "[subscription().subscriptionId]",
       "properties": {
@@ -323,11 +323,11 @@
               "outputs": {
                 "privateIpAddress": {
                   "type": "string",
-                  "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('nicName')), '2021-05-01', 'Full').ipConfigurations[0].properties.privateIPAddress]"
+                  "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('nicName'))).ipConfigurations[0].properties.privateIPAddress]"
                 },
                 "metallicGatewayClientName":{
                   "type": "string",
-                  "value": "[concat(parameters('vmName'), '-', reference(resourceId('Microsoft.Compute/virtualMachines', parameters('vmName')),'2021-03-01', 'Full').vmId)]"
+                  "value": "[concat(parameters('vmName'), '-', reference(resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))).vmId)]"
                 },
                 "adminUsername": {
                   "type": "String",
@@ -335,6 +335,20 @@
                 }
               }
             }
+          }
+        },
+        {
+          "condition": "[contains(parameters('identity').type, 'SystemAssigned')]",
+          "type": "Microsoft.Authorization/roleAssignments",
+          "apiVersion": "2018-09-01-preview",
+          "name": "[variables('bootstrapRoleAssignmentId')]",
+          "dependsOn": [
+            "[concat('nested-', parameters('vmName'))]"
+        ],
+          "properties": {
+              "roleDefinitionId": "[variables('Reader')]",
+              "principalId": "[reference(resourceId(subscription().subscriptionId,parameters('resourceGroupInfo').name,'Microsoft.Compute/virtualMachines', variables('vName')), '2021-03-01', 'Full').identity.principalId]",
+              "principalType": "ServicePrincipal"
           }
         }
       ]
