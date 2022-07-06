@@ -129,7 +129,7 @@
      "addressPrefixes": "[split(parameters('addressPrefixes'), ',')]",
      "Reader": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
      "bootstrapRoleAssignmentId": "[guid(concat(subscription().subscriptionId, 'Reader', parameters('vmName')))]",
-     "subnetId": "[resourceId(subscription().id,parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetName'))]"
+     "subnetId": "[resourceId(subscription().subscriptionId,parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetName'))]"
   },
   "resources": [
     {
