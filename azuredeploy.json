@@ -320,11 +320,11 @@
               "outputs": {
                 "privateIpAddress": {
                   "type": "string",
-                  "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', variables('nicName')), '2021-05-01', 'Full').ipConfigurations[0].properties.privateIPAddress]"
+                  "value": "[reference(subscription().subscriptionId,parameters('resourceGroupInfo').name,resourceId('Microsoft.Network/networkInterfaces', variables('nicName')), '2021-05-01', 'Full').ipConfigurations[0].properties.privateIPAddress]"
                 },
                 "metallicGatewayClientName":{
                   "type": "string",
-                  "value": "[concat(parameters('vmName'), '-', reference(resourceId('Microsoft.Compute/virtualMachines', variables('vName')),'2021-03-01', 'Full').vmId)]"
+                  "value": "[concat(parameters('vmName'), '-', reference(resourceId(subscription().subscriptionId,parameters('resourceGroupInfo').name,'Microsoft.Compute/virtualMachines', variables('vName')),'2021-03-01', 'Full').vmId)]"
                 },
                 "adminUsername": {
                   "type": "String",
@@ -332,20 +332,6 @@
                 }
               }
             }
-          }
-        },
-        {
-          "condition": "[contains(parameters('identity').type, 'SystemAssigned')]",
-          "type": "Microsoft.Authorization/roleAssignments",
-          "apiVersion": "2018-09-01-preview",
-          "name": "[variables('bootstrapRoleAssignmentId')]",
-          "dependsOn": [
-            "[resourceId(subscription().subscriptionId,parameters('resourceGroupInfo').name,'Microsoft.Compute/virtualMachines', variables('vName'))]"
-        ],
-          "properties": {
-              "roleDefinitionId": "[variables('Reader')]",
-              "principalId": "[reference(resourceId(subscription().subscriptionId,parameters('resourceGroupInfo').name,'Microsoft.Compute/virtualMachines', variables('vName')), '2021-03-01', 'Full').identity.principalId]",
-              "principalType": "ServicePrincipal"
           }
         }
       ]
