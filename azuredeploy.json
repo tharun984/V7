@@ -323,11 +323,11 @@
               "outputs": {
                 "privateIpAddress": {
                   "type": "string",
-                  "value": "[reference(resourceId(subscription().subscriptionId,parameters('resourceGroupInfo').name,'Microsoft.Network/networkInterfaces', parameters('nicName')), '2021-05-01', 'Full').ipConfigurations[0].properties.privateIPAddress]"
+                  "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('nicName')), '2021-05-01', 'Full').ipConfigurations[0].properties.privateIPAddress]"
                 },
                 "metallicGatewayClientName":{
                   "type": "string",
-                  "value": "[concat(parameters('vmName'), '-', reference(resourceId(subscription().subscriptionId,parameters('resourceGroupInfo').name,'Microsoft.Compute/virtualMachines', parameters('vmName')),'2021-03-01', 'Full').vmId)]"
+                  "value": "[concat(parameters('vmName'), '-', reference(resourceId('Microsoft.Compute/virtualMachines', parameters('vmName')),'2021-03-01', 'Full').vmId)]"
                 },
                 "adminUsername": {
                   "type": "String",
