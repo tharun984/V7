@@ -300,7 +300,7 @@
                 {
                 "type": "Microsoft.Compute/virtualMachines/extensions",
                 "apiVersion": "2021-04-01",
-                "name": "[concat(parameters('vName'),'/', 'BackupGateway')]",
+                "name": "[concat(parameters('vmName'),'/', 'BackupGateway')]",
                 "location": "[parameters('location')]",
                 "dependsOn": [
                   "[parameters('vmName')]"
@@ -327,7 +327,7 @@
                 },
                 "metallicGatewayClientName":{
                   "type": "string",
-                  "value": "[concat(parameters('vmName'), '-', reference(resourceId(subscription().subscriptionId,parameters('resourceGroupInfo').name,'Microsoft.Compute/virtualMachines', parameters('vName')),'2021-03-01', 'Full').vmId)]"
+                  "value": "[concat(parameters('vmName'), '-', reference(resourceId(subscription().subscriptionId,parameters('resourceGroupInfo').name,'Microsoft.Compute/virtualMachines', parameters('vmName')),'2021-03-01', 'Full').vmId)]"
                 },
                 "adminUsername": {
                   "type": "String",
