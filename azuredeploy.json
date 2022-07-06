@@ -340,7 +340,7 @@
           "apiVersion": "2018-09-01-preview",
           "name": "[variables('bootstrapRoleAssignmentId')]",
           "dependsOn": [
-            "[resourceId(subscription().subscriptionId,[parameters('resourceGroupInfo').name],'Microsoft.Compute/virtualMachines', variables('vName'))]"
+            "[resourceId(subscription().subscriptionId,parameters('resourceGroupInfo').name,'Microsoft.Compute/virtualMachines', variables('vName'))]"
         ],
           "properties": {
               "roleDefinitionId": "[variables('Reader')]",
