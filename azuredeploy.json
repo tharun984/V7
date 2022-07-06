@@ -141,9 +141,52 @@
       "subscriptionId": "[subscription().subscriptionId]",
       "properties": {
         "mode": "Incremental",
+        "expressionEvaluationOptions": {
+					"scope": "inner"
+				},
+        "parameters": {
+          "location" : {"value": "[parameters('location')]"},
+          "vmName": {"value": "[parameters('vmName')]"},
+          "adminUsername": {"value": "[parameters('adminUsername')]"},
+          "adminPassword": {"value": "[parameters('adminPassword')]"},
+          "vmsize": {"value": "[parameters('vmsize')]"},
+          "dataDiskSize": {"value": "[parameters('dataDiskSize')]"},
+          "virtualNetworkNewOrExisting": {"value": "[parameters('virtualNetworkNewOrExisting')]"},
+          "virtualNetworkName": {"value": "[parameters('virtualNetworkName')]"},
+          "addressPrefixes": {"value": "[parameters('addressPrefixes')]"},
+          "subnetName": {"value": "[parameters('subnetName')]"},
+          "subnetPrefix": {"value": "[parameters('subnetPrefix')]"},
+          "virtualNetworkResourceGroupName": {"value": "[parameters('virtualNetworkResourceGroupName')]"},
+          "OSVersion": {"value": "[parameters('OSVersion')]"},
+          "backupGatewayPackage": {"value": "[parameters('backupGatewayPackage')]"},
+          "companyAuthCode": {"value": "[parameters('companyAuthCode')]"},
+          "identity": {"value": "[parameters('identity')]"},
+          "resourceGroupInfo": {"value": "[parameters('resourceGroupInfo')]"},
+          "subnetId": {"value": "[variables('subnetId')]"}
+        },
         "template": {
             "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
             "contentVersion": "1.0.0.0",
+            "parameters": {
+              "location" : {"type": "string"},
+              "vmName": {"type": "string"},
+              "adminUsername": {"type": "string"},
+              "adminPassword": {"type": "secureString"},
+              "vmsize": {"type": "string"},
+              "dataDiskSize": {"type": "string"},
+              "virtualNetworkNewOrExisting": {"type": "string"},
+              "virtualNetworkName": {"type": "string"},
+              "addressPrefixes": {"type": "string"},
+              "subnetName": {"type": "string"},
+              "subnetPrefix": {"type": "string"},
+              "virtualNetworkResourceGroupName": {"type": "string"},
+              "OSVersion": {"type": "string"},
+              "backupGatewayPackage": {"type": "string"},
+              "companyAuthCode": {"type": "string"},
+              "identity": {"type": "object"},
+              "resourceGroupInfo": {"type": "object"},
+              "subnetId": {"type": "string"}
+            },
             "resources": [
               {
                 "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
@@ -177,7 +220,7 @@
                         "properties": {
                           "privateIPAllocationMethod": "Dynamic",
                           "subnet": {
-                            "id": "[variables('subnetId')]"
+                            "id": "[parameters('subnetId')]"
                           }
                         }
                       }
@@ -281,7 +324,7 @@
                 },
                 "metallicGatewayClientName":{
                   "type": "string",
-                  "value": "[concat(parameters('vmName'), '-', reference(resourceId('Microsoft.Compute/virtualMachines', variables('vName')), '2021-03-01', 'Full').vmId)]"
+                  "value": "[concat(parameters('vmName'), '-', reference(resourceId('Microsoft.Compute/virtualMachines', variables('vName')),'2021-03-01', 'Full').vmId)]"
                 },
                 "adminUsername": {
                   "type": "String",
@@ -296,9 +339,12 @@
           "type": "Microsoft.Authorization/roleAssignments",
           "apiVersion": "2018-09-01-preview",
           "name": "[variables('bootstrapRoleAssignmentId')]",
+          "dependsOn": [
+            "[resourceId(subscription().subscriptionId,[parameters('resourceGroupInfo').name],'Microsoft.Compute/virtualMachines', variables('vName'))]"
+        ],
           "properties": {
               "roleDefinitionId": "[variables('Reader')]",
-              "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines', variables('vName')), '2021-03-01', 'Full').identity.principalId]",
+              "principalId": "[reference(resourceId(subscription().subscriptionId,parameters('resourceGroupInfo').name,'Microsoft.Compute/virtualMachines', variables('vName')), '2021-03-01', 'Full').identity.principalId]",
               "principalType": "ServicePrincipal"
           }
         }
