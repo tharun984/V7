@@ -181,10 +181,7 @@
                         }
                       }
                     ]
-                  },
-                  "dependsOn": [
-                    "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
-                  ]
+                  }
                 },
                 {
                   "name": "[variables('diskname')]",
