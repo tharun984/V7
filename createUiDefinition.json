@@ -7,7 +7,7 @@
             "basics": {
                 "description": "Metallic backup gateway wizard",
 				"subscription": {},
-				"resourceGroup": {"visible": true},
+				"resourceGroup": {},
                 "location": {
 					"label": "Resource group region",
 					"toolTip": "This field will be auto-populated if existing resource group is selected.",
