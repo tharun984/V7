@@ -137,7 +137,6 @@
       "apiVersion": "2021-04-01",
       "name": "[concat('nested', parameters('vmName'))]",
       "resourceGroup": "[parameters('resourceGroupInfo').name]",
-      "location": "[parameters('resourceGroupInfo').location]",
       "subscriptionId": "[subscription().subscriptionId]",
       "properties": {
         "mode": "Incremental",
