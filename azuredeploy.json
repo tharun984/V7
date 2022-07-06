@@ -152,7 +152,7 @@
           "dataDiskSize": {"value": "[parameters('dataDiskSize')]"},
           "virtualNetworkNewOrExisting": {"value": "[parameters('virtualNetworkNewOrExisting')]"},
           "virtualNetworkName": {"value": "[parameters('virtualNetworkName')]"},
-          "addressPrefixes": {"value": "[parameters('addressPrefixes')]"},
+          "addressPrefixes": {"value": "[variables('addressPrefixes')]"},
           "subnetName": {"value": "[parameters('subnetName')]"},
           "subnetPrefix": {"value": "[parameters('subnetPrefix')]"},
           "virtualNetworkResourceGroupName": {"value": "[parameters('virtualNetworkResourceGroupName')]"},
@@ -161,7 +161,9 @@
           "companyAuthCode": {"value": "[parameters('companyAuthCode')]"},
           "identity": {"value": "[parameters('identity')]"},
           "resourceGroupInfo": {"value": "[parameters('resourceGroupInfo')]"},
-          "subnetId": {"value": "[variables('subnetId')]"}
+          "subnetId": {"value": "[variables('subnetId')]"},
+          "nicName": {"value": "[variables('nicName')]"},
+          "diskname": {"value": "[variables('diskname')]"}
         },
         "template": {
             "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -195,7 +197,7 @@
                 "location": "[parameters('location')]",
                 "properties": {
                   "addressSpace": {
-                    "addressPrefixes": "[variables('addressPrefixes')]"
+                    "addressPrefixes": "[parameters('addressPrefixes')]"
                   },
                   "subnets": [
                     {
@@ -210,7 +212,7 @@
               {
                   "type": "Microsoft.Network/networkInterfaces",
                   "apiVersion": "2021-05-01",
-                  "name": "[variables('nicName')]",
+                  "name": "[parameters('nicName')]",
                   "location": "[parameters('location')]",
                   "properties": {
                     "ipConfigurations": [
@@ -227,7 +229,7 @@
                   }
                 },
                 {
-                  "name": "[variables('diskname')]",
+                  "name": "[parameters('diskname')]",
                   "type": "Microsoft.Compute/disks",
                   "apiVersion": "2020-12-01",
                   "location": "[parameters('location')]",
@@ -275,7 +277,7 @@
                           "createOption": "attach",
                           "caching": "ReadOnly",
                           "managedDisk": {
-                            "id": "[resourceId('Microsoft.Compute/disks', variables('diskname'))]"
+                            "id": "[resourceId('Microsoft.Compute/disks', parameters('diskname'))]"
                           }
                         }
                       ]
@@ -283,20 +285,20 @@
                     "networkProfile": {
                       "networkInterfaces": [
                         {
-                          "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+                          "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nicName'))]"
                         }
                       ]
                     }
                   },
                   "dependsOn": [
-                    "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]",
-                    "[resourceId('Microsoft.Compute/disks', variables('diskname'))]"
+                    "[resourceId('Microsoft.Network/networkInterfaces', parameters('nicName'))]",
+                    "[resourceId('Microsoft.Compute/disks', parameters('diskname'))]"
                   ]
                 },
                 {
                 "type": "Microsoft.Compute/virtualMachines/extensions",
                 "apiVersion": "2021-04-01",
-                "name": "[concat(variables('vName'),'/', 'BackupGateway')]",
+                "name": "[concat(parameters('vmName'),'/', 'BackupGateway')]",
                 "location": "[parameters('location')]",
                 "dependsOn": [
                   "[parameters('vmName')]"
@@ -319,11 +321,11 @@
               "outputs": {
                 "privateIpAddress": {
                   "type": "string",
-                  "value": "[reference(subscription().subscriptionId,parameters('resourceGroupInfo').name,resourceId('Microsoft.Network/networkInterfaces', variables('nicName')), '2021-05-01', 'Full').ipConfigurations[0].properties.privateIPAddress]"
+                  "value": "[reference(subscription().subscriptionId,parameters('resourceGroupInfo').name,resourceId('Microsoft.Network/networkInterfaces', parameters('nicName')), '2021-05-01', 'Full').ipConfigurations[0].properties.privateIPAddress]"
                 },
                 "metallicGatewayClientName":{
                   "type": "string",
-                  "value": "[concat(parameters('vmName'), '-', reference(resourceId(subscription().subscriptionId,parameters('resourceGroupInfo').name,'Microsoft.Compute/virtualMachines', variables('vName')),'2021-03-01', 'Full').vmId)]"
+                  "value": "[concat(parameters('vmName'), '-', reference(resourceId(subscription().subscriptionId,parameters('resourceGroupInfo').name,'Microsoft.Compute/virtualMachines', parameters('vmName')),'2021-03-01', 'Full').vmId)]"
                 },
                 "adminUsername": {
                   "type": "String",
