@@ -193,7 +193,7 @@
 						"systemAssignedIdentity": "Off"
 					},
 					"options": {
-						"hideSystemAssignedIdentity": true,
+						"hideSystemAssignedIdentity": false,
 						"hideUserAssignedIdentity": false
 					},
 					"visible": true
