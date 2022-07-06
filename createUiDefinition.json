@@ -242,7 +242,11 @@
 
             "companyAuthCode": "[steps('metallicconfig').companyauthcode]",
 			"identity": "[steps('VirtualMachineConfig').identity]",
-            "resourceGroupInfo": "[resourceGroup()]"
+            "resourceGroupInfo": {
+      "mode": "Existing",
+      "name": "MBKPGT",
+      "location": "southindia"
+    }
         }
     }
 }
