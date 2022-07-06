@@ -300,7 +300,7 @@
                 "name": "[concat(variables('vName'),'/', 'BackupGateway')]",
                 "location": "[parameters('location')]",
                 "dependsOn": [
-                  "[concat('Microsoft.Compute/virtualMachines/',variables('vName'))]"
+                  "[parameters('vmName')]"
                 ],
                 "properties": {
                   "protectedSettings": {},
