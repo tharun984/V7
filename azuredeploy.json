@@ -343,7 +343,7 @@
           "apiVersion": "2018-09-01-preview",
           "name": "[variables('bootstrapRoleAssignmentId')]",
           "dependsOn": [
-            "[concat('nested-', parameters('vmName'))]"
+            "[resourceId(subscription().subscriptionId,parameters('resourceGroupInfo').name,'Microsoft.Compute/virtualMachines', variables('vName'))]"
         ],
           "properties": {
               "roleDefinitionId": "[variables('Reader')]",
