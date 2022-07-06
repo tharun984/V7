@@ -11,7 +11,7 @@
                 "location": {
 					"label": "Resource group region",
 					"toolTip": "This field will be auto-populated if existing resource group is selected.",
-					"visible": true
+					"visible": false
                 }
             }
         },
