@@ -132,136 +132,167 @@
   },
   "resources": [
     {
-      "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
-      "type": "Microsoft.Network/virtualNetworks",
-      "apiVersion": "2021-02-01",
-      "name": "[parameters('virtualNetworkName')]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": "[variables('addressPrefixes')]"
-        },
-        "subnets": [
-          {
-            "name": "[parameters('subnetName')]",
-            "properties": {
-              "addressPrefix": "[parameters('subnetPrefix')]"
-            }
-          }
-        ]
-      }
-    },
-    {
-        "type": "Microsoft.Network/networkInterfaces",
-        "apiVersion": "2021-05-01",
-        "name": "[variables('nicName')]",
-        "location": "[parameters('location')]",
-        "properties": {
-          "ipConfigurations": [
-            {
-              "name": "ipconfig1",
-              "properties": {
-                "privateIPAllocationMethod": "Dynamic",
-                "subnet": {
-                  "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetName'))]"
-                }
-              }
-            }
-          ]
-        },
-        "dependsOn": [
-          "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
-        ]
-      },
-      {
-        "name": "[variables('diskname')]",
-        "type": "Microsoft.Compute/disks",
-        "apiVersion": "2020-12-01",
-        "location": "[parameters('location')]",
-        "properties": {
-          "diskSizeGB": "[int(parameters('dataDiskSize'))]",
-          "creationData": {
-            "createOption": "empty"
-          }
-        },
-        "sku": {
-          "name": "Premium_LRS"
-        }
-      },
-      {
-        "type": "Microsoft.Compute/virtualMachines",
-        "apiVersion": "2021-03-01",
-        "name": "[parameters('vmName')]",
-        "location": "[parameters('location')]",
-        "identity": "[if(not(equals(parameters('identity').type, 'None')), parameters('identity') , json('null'))]",
-        "properties": {
-          "hardwareProfile": {
-            "vmSize": "[parameters('vmsize')]"
-          },
-          "osProfile": {
-            "computerName": "[parameters('vmName')]",
-            "adminUsername": "[parameters('adminUsername')]",
-            "adminPassword": "[parameters('adminPassword')]"
-          },
-          "storageProfile": {
-            "imageReference": {
-              "publisher": "MicrosoftWindowsServer",
-              "offer": "WindowsServer",
-              "sku": "[parameters('OSVersion')]",
-              "version": "latest"
-            },
-            "osDisk": {
-              "createOption": "FromImage",
-              "managedDisk": {
-                "storageAccountType": "StandardSSD_LRS"
-              }
-            },
-            "dataDisks": [
-              {
-                "lun": 0,
-                "createOption": "attach",
-                "caching": "ReadOnly",
-                "managedDisk": {
-                  "id": "[resourceId('Microsoft.Compute/disks', variables('diskname'))]"
-                }
-              }
-            ]
-          },
-          "networkProfile": {
-            "networkInterfaces": [
-              {
-                "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
-              }
-            ]
-          }
-        },
-        "dependsOn": [
-          "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]",
-          "[resourceId('Microsoft.Compute/disks', variables('diskname'))]"
-        ]
-      },
-      {
-      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "name": "[concat(variables('vName'),'/', 'BackupGateway')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/',variables('vName'))]"
-      ],
+      "name": "[concat('nested', parameters('vmName'))]",
+      "resourceGroup": "[parameters('resourceGroupInfo').name]",
+      "location": "[parameters('resourceGroupInfo').location]",
+      "subscriptionId": "[subscription().subscriptionId]",
       "properties": {
-        "protectedSettings": {},
-        "publisher": "Microsoft.Compute",
-        "type": "CustomScriptExtension",
-        "typeHandlerVersion": "1.7",
-        "autoUpgradeMinorVersion": true,
-        "settings": {
-          "fileUris": [
-            "https://raw.githubusercontent.com/tharun984/V6/main/installpackage.ps1"
-          ],
-          "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File installpackage.ps1 -packagedownloaduri ',parameters('backupGatewayPackage'),' -companyauthcode ', parameters('companyAuthCode'))]"
-        }
-      }
-    },
+        "mode": "Incremental",
+        "template": {
+            "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "resources": [
+              {
+                "condition": "[equals(parameters('virtualNetworkNewOrExisting'), 'new')]",
+                "type": "Microsoft.Network/virtualNetworks",
+                "apiVersion": "2021-02-01",
+                "name": "[parameters('virtualNetworkName')]",
+                "location": "[parameters('location')]",
+                "properties": {
+                  "addressSpace": {
+                    "addressPrefixes": "[variables('addressPrefixes')]"
+                  },
+                  "subnets": [
+                    {
+                      "name": "[parameters('subnetName')]",
+                      "properties": {
+                        "addressPrefix": "[parameters('subnetPrefix')]"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                  "type": "Microsoft.Network/networkInterfaces",
+                  "apiVersion": "2021-05-01",
+                  "name": "[variables('nicName')]",
+                  "location": "[parameters('location')]",
+                  "properties": {
+                    "ipConfigurations": [
+                      {
+                        "name": "ipconfig1",
+                        "properties": {
+                          "privateIPAllocationMethod": "Dynamic",
+                          "subnet": {
+                            "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('subnetName'))]"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "dependsOn": [
+                    "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
+                  ]
+                },
+                {
+                  "name": "[variables('diskname')]",
+                  "type": "Microsoft.Compute/disks",
+                  "apiVersion": "2020-12-01",
+                  "location": "[parameters('location')]",
+                  "properties": {
+                    "diskSizeGB": "[int(parameters('dataDiskSize'))]",
+                    "creationData": {
+                      "createOption": "empty"
+                    }
+                  },
+                  "sku": {
+                    "name": "Premium_LRS"
+                  }
+                },
+                {
+                  "type": "Microsoft.Compute/virtualMachines",
+                  "apiVersion": "2021-03-01",
+                  "name": "[parameters('vmName')]",
+                  "location": "[parameters('location')]",
+                  "identity": "[if(not(equals(parameters('identity').type, 'None')), parameters('identity') , json('null'))]",
+                  "properties": {
+                    "hardwareProfile": {
+                      "vmSize": "[parameters('vmsize')]"
+                    },
+                    "osProfile": {
+                      "computerName": "[parameters('vmName')]",
+                      "adminUsername": "[parameters('adminUsername')]",
+                      "adminPassword": "[parameters('adminPassword')]"
+                    },
+                    "storageProfile": {
+                      "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "[parameters('OSVersion')]",
+                        "version": "latest"
+                      },
+                      "osDisk": {
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                          "storageAccountType": "StandardSSD_LRS"
+                        }
+                      },
+                      "dataDisks": [
+                        {
+                          "lun": 0,
+                          "createOption": "attach",
+                          "caching": "ReadOnly",
+                          "managedDisk": {
+                            "id": "[resourceId('Microsoft.Compute/disks', variables('diskname'))]"
+                          }
+                        }
+                      ]
+                    },
+                    "networkProfile": {
+                      "networkInterfaces": [
+                        {
+                          "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+                        }
+                      ]
+                    }
+                  },
+                  "dependsOn": [
+                    "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]",
+                    "[resourceId('Microsoft.Compute/disks', variables('diskname'))]"
+                  ]
+                },
+                {
+                "type": "Microsoft.Compute/virtualMachines/extensions",
+                "apiVersion": "2021-04-01",
+                "name": "[concat(variables('vName'),'/', 'BackupGateway')]",
+                "location": "[parameters('location')]",
+                "dependsOn": [
+                  "[concat('Microsoft.Compute/virtualMachines/',variables('vName'))]"
+                ],
+                "properties": {
+                  "protectedSettings": {},
+                  "publisher": "Microsoft.Compute",
+                  "type": "CustomScriptExtension",
+                  "typeHandlerVersion": "1.7",
+                  "autoUpgradeMinorVersion": true,
+                  "settings": {
+                    "fileUris": [
+                      "https://raw.githubusercontent.com/tharun984/V6/main/installpackage.ps1"
+                    ],
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File installpackage.ps1 -packagedownloaduri ',parameters('backupGatewayPackage'),' -companyauthcode ', parameters('companyAuthCode'))]"
+                  }
+                }
+              }
+            ],
+              "outputs": {
+                "privateIpAddress": {
+                  "type": "string",
+                  "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))).ipConfigurations[0].properties.privateIPAddress]"
+                },
+                "metallicGatewayClientName":{
+                  "type": "string",
+                  "value": "[concat(parameters('vmName'), '-', reference(resourceId('Microsoft.Compute/virtualMachines', variables('vName'))).vmId)]"
+                },
+                "adminUsername": {
+                  "type": "String",
+                  "value": "[parameters('adminUsername')]"
+                }
+              }
+            }
+          }
+        },
         {
           "condition": "[contains(parameters('identity').type, 'SystemAssigned')]",
           "type": "Microsoft.Authorization/roleAssignments",
@@ -276,19 +307,5 @@
               "principalType": "ServicePrincipal"
           }
         }
-      ],
-      "outputs": {
-        "privateIpAddress": {
-          "type": "string",
-          "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))).ipConfigurations[0].properties.privateIPAddress]"
-        },
-        "metallicGatewayClientName":{
-          "type": "string",
-          "value": "[concat(parameters('vmName'), '-', reference(resourceId('Microsoft.Compute/virtualMachines', variables('vName'))).vmId)]"
-        },
-        "adminUsername": {
-          "type": "String",
-          "value": "[parameters('adminUsername')]"
-        }
-      }
+      ]
   }
